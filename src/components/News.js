@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Newsitem from "./Newsitem";
+import Loader  from "./Loader";
 
 export class News extends Component { 
 
@@ -13,7 +14,8 @@ export class News extends Component {
   }
   async componentDidMount(){
     console.log("i am using the cdm");
-    let url = "https://newsapi.org/v2/everything?q=apple&q=tesla&q=microsoft&from=2024-08-18&to=2024-08-18&sortBy=popularity&apiKey=f73b98a7cd2b4da5abfa54d5df8fbd03&page=1&pagesize=20";
+    let url = `https://newsapi.org/v2/everything?q=technology&from=2024-08-18&to=2024-08-18&sortBy=popularity&apiKey=f73b98a7cd2b4da5abfa54d5df8fbd03&page=1&pagesize=${this.props.pageSize}`;
+    this.setState({loading : true})
     let data = await fetch(url);
   
     // let parsedData = await data.json();
@@ -34,12 +36,13 @@ export class News extends Component {
   }
 
   handleNextBtn =  async ()=>{
-    if(this.state.page +1 > (Math.ceil(this.totalResult/20))){
+    if(this.state.page +1 > (Math.ceil(this.totalResult/this.props.pageSize))){
 
     }
     else{
     console.log("i am using the cdm");
-    let url = `https://newsapi.org/v2/everything?q=apple&q=tesla&q=microsoft&language=en&from=2024-08-18&to=2024-08-18&sortBy=popularity&apiKey=f73b98a7cd2b4da5abfa54d5df8fbd03&page=${this.state.page + 1}&pagesize=20`;
+    let url = `https://newsapi.org/v2/everything?q=technology&language=en&from=2024-08-18&to=2024-08-18&sortBy=popularity&apiKey=f73b98a7cd2b4da5abfa54d5df8fbd03&page=${this.state.page + 1}&pagesize=${this.props.pageSize}`;
+    this.setState({loading : true})
     let data = await fetch(url);
   
         console.log("click Next button");
@@ -48,7 +51,8 @@ export class News extends Component {
             this.setState({
                 articles: json.articles,
                 loading: false,
-                page : this.state.page + 1
+                page : this.state.page + 1,
+                loading : false
             });
         })
       }
@@ -56,7 +60,8 @@ export class News extends Component {
   handlePrevBtn = async ()=>{
     console.log("click Next button")
     console.log("i am using the cdm");
-    let url = `https://newsapi.org/v2/everything?q=apple&q=tesla&q=microsoft&from=2024-08-18&to=2024-08-18&sortBy=popularity&apiKey=f73b98a7cd2b4da5abfa54d5df8fbd03&page=${this.state.page - 1}&pagesize=20`;
+    let url = `https://newsapi.org/v2/everything?q=technology&from=2024-08-18&to=2024-08-18&sortBy=popularity&apiKey=f73b98a7cd2b4da5abfa54d5df8fbd03&page=${this.state.page - 1}&pagesize=${this.props.pageSize}`;
+    this.setState({loading : true})
     let data = await fetch(url);
   
         console.log("click Next button");
@@ -65,7 +70,8 @@ export class News extends Component {
             this.setState({
                 articles: json.articles,
                 loading: false,
-                page : this.state.page - 1
+                page : this.state.page - 1,
+                loading : false
             });
         })
  
@@ -73,13 +79,14 @@ export class News extends Component {
    render() {
     return (
       <div className="container my-4">
-        <h2>TechCrunch - Top Headlines</h2>
+        <h1 className="text-center">TechCrunch - Top Headlines</h1>
+        {this.state.loading && <Loader/>}
         <div className="row">
-         {this.state.articles.map((element) =>{
+         {!this.state.loading && this.state.articles.map((element) =>{
              return <div className="col-md-4" key={element.url}>
              <Newsitem
-               title={element.title?element.title.slice(0,45):""}
-               description={element.description?element.description.slice(0,88):""}
+               title={element.title}
+               description={element.description}
                imageUrl={element.urlToImage}
                newsUrl = {element.url}
              />
@@ -89,7 +96,7 @@ export class News extends Component {
         </div>
         <div className="conatainer d-flex justify-content-between">
         <button disabled = {this.state.page<=1} type="button" onClick={this.handlePrevBtn} className="btn btn-dark">&larr; Prevoius</button>
-        <button type="button" onClick={this.handleNextBtn} className="btn btn-dark">Next &rarr;</button>
+        <button disabled = {this.state.page +1 > (Math.ceil(this.totalResult/this.props.pageSize))} type="button" onClick={this.handleNextBtn} className="btn btn-dark">Next &rarr;</button>
         </div>
       </div>
     );
